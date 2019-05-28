@@ -18,7 +18,7 @@ function handleAllPlaylistData(playlistData){
 	for (let i = keys.length - 1; i >= 0; i--) {
 		console.log(playlistData[keys[i]])
 
-		// debugger 
+		// debugger
 		const playlistDiv = document.createElement("div")
 		const playlistH3 = document.createElement("h3")
 		playlistH3.innerText = playlistData[keys[i]].playlistTitle
@@ -101,14 +101,14 @@ function makeCreateDiv(){
 }
 
 function searchAlbumsForThisArtist(event) {
-	
+
 	let artistStringInput = document.querySelector(".artist-to-search-input").value
 	let mutatedArtistString = artistStringInput.replace(/\s+/g, '');
 
 	fetch(`http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${mutatedArtistString}&api_key=56db8dc89ddf7721c47c718da7786420&format=json&limit=15"`)
 	.then(res => res.json())
 	.then(albumData => putAlbumsInDropDown(albumData["topalbums"].album))
-	
+
 }
 
 function putAlbumsInDropDown(albumData) {
@@ -116,6 +116,9 @@ function putAlbumsInDropDown(albumData) {
 	// let artistStringInputTag = document.querySelector(".artist-to-search-input")
 	const albumsDiv = document.querySelector(".albums-div")
 	const select = document.querySelector("#select")
+	const blankFirstOption = document.createElement("option")
+	blankFirstOption.innerText = "Choose an album"
+	select.appendChild(blankFirstOption)
 	albumData.forEach(album => {
 		const newOption = document.createElement("option")
 		newOption.value = album.name
@@ -123,24 +126,26 @@ function putAlbumsInDropDown(albumData) {
 		select.appendChild(newOption)
 	})
 
-	select.addEventListener("click", () => {
+	select.addEventListener("change", () => {
 		let selOption = select.options[select.selectedIndex]
-		console.log(selOption.value)
-		const newAlbum = document.createElement("div")
-		const newH4 = document.createElement("h4")
-		newAlbum.appendChild(newH4)
-		newH4.innerText = selOption.value
-		albumsDiv.appendChild(newAlbum)
-		for(let i = 0; i < event.target.length; i++){
-			if (event.target[i].value == selOption.value){
-				event.target[i].remove()
-				// event.target[i].preventDefault()
-				//just make it so every time you select album you have to press ok button, put the event listener on that instead of select ?
+		let firstOption = select.options[0]
+		if (selOption !== firstOption) {
+			console.log(selOption.value)
+			const newAlbum = document.createElement("div")
+			const newH4 = document.createElement("h4")
+			newAlbum.appendChild(newH4)
+			newH4.innerText = selOption.value
+			albumsDiv.appendChild(newAlbum)
+			for(let i = 0; i < event.target.length; i++){
+				if (event.target[i].value == selOption.value){
+					event.target[i].remove()
+					//just make it so every time you select album you have to press ok button, put the event listener on that instead of select ?
+				}
 			}
 		}
 		// debugger
 	})
-	
+
 }
 
 
@@ -165,7 +170,7 @@ function addAlbumsToPlaylist(albumsAndPlaylists) {
 	}
 	outerAlbumModal.appendChild(albumWrapper)
 	outerAlbumModal.appendChild(xbutton)
-	
+
 	albumsAndPlaylists.albums[0].forEach((album) => {
 		const singleAlbumDiv = document.createElement("div")
 		const albumP = document.createElement("p")
@@ -187,12 +192,3 @@ function addAlbumsToPlaylist(albumsAndPlaylists) {
 	})
 
 }
-
-
-
-
-
-
-
-
-
