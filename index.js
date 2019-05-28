@@ -90,6 +90,16 @@ function makeCreateDiv(){
 	albumsDiv.className = "albums-div"
 	const saveButton = document.createElement("button")
 	saveButton.innerText = "SAVE"
+	saveButton.id = ('save-button')
+
+
+	saveButton.addEventListener("click", () => {
+		createPlaylistInDb();
+		// createClassifcation();
+		// createPlaylistCard();
+	})
+
+
 	albumWrapper.appendChild(createForm)
 	albumWrapper.appendChild(titleInput)
 
@@ -112,12 +122,15 @@ function searchAlbumsForThisArtist(event) {
 }
 
 function putAlbumsInDropDown(albumData) {
-	console.log(albumData)
+	// console.log(albumData)
 	// let artistStringInputTag = document.querySelector(".artist-to-search-input")
+
 	const albumsDiv = document.querySelector(".albums-div")
-	const select = document.querySelector("#select")
-	const blankFirstOption = document.createElement("option")
+	const select = document.querySelector("#select") // select dropdown for albums
+	const blankFirstOption = document.createElement("option") // placeholder first option on dropdown
 	blankFirstOption.innerText = "Choose an album"
+
+	// create dropdown options
 	select.appendChild(blankFirstOption)
 	albumData.forEach(album => {
 		const newOption = document.createElement("option")
@@ -128,31 +141,32 @@ function putAlbumsInDropDown(albumData) {
 	})
 
 	select.addEventListener("change", () => {
-		// post fetch to create album
 
-		let selOption = select.options[select.selectedIndex]
+		const selOption = select.options[select.selectedIndex]
 		let firstOption = select.options[0]
-		createAlbumInDb(selOption)
+
+
+		// bug fix for select registering change event duplicates
 		if (selOption !== firstOption) {
-			console.log(selOption.value)
+			// console.log(selOption.value)
 			const newAlbum = document.createElement("div")
 			const newH4 = document.createElement("h4")
 			newAlbum.appendChild(newH4)
 			newH4.innerText = selOption.value
+			// on selection, create album in database
+			createAlbumInDb(selOption, newH4)
+
 			albumsDiv.appendChild(newAlbum)
 			for(let i = 0; i < event.target.length; i++){
 				if (event.target[i].value == selOption.value){
 					event.target[i].remove()
-					//just make it so every time you select album you have to press ok button, put the event listener on that instead of select ?
 				}
 			}
 		}
-		// debugger
 	})
-
 }
 
-function createAlbumInDb(selOpt){
+function createAlbumInDb(selOpt, h4Div){
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
 
@@ -167,8 +181,59 @@ function createAlbumInDb(selOpt){
 			title: title
 		})
 	})
-	.then(resp => console.log(resp.json()))
-	.then(data => console.log(data))
+	.then(resp => resp.json())
+	.then(data => h4Div.id = (`h4-${data.id}`))
+
+
+}
+
+function createPlaylistInDb(){
+	const albumsList = document.querySelector('.albums-div')
+	const playlistName = document.querySelector('.title-input')
+
+	fetch(playlistUrl, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
+		},
+		body: JSON.stringify({
+			title: playlistName.value
+		})
+	})
+	.then(resp => resp.json())
+	.then(function(data) {
+		// createClassifications(data)
+		createPlaylistCard(data)
+	})
+
+
+
+	// to access album ids for classification creation
+	// for (let item of albumsList.children) {
+	// console.log(item.firstChild.dataset.albumId)
+	// }
+}
+
+
+function createPlaylistCard(playlistObj) {
+	const playlistDiv = document.createElement("div")
+	const playlistH3 = document.createElement("h3")
+	const playlistTitle = playlistObj.title
+
+	playlistH3.innerText = playlistTitle
+
+	playlistDiv.appendChild(playlistH3)
+	outerDiv.appendChild(playlistDiv)
+
+	// refactor??
+	let allAlbums = document.querySelectorAll("h4[id^='h4-']")
+	for (let album of allAlbums) {
+
+	}
+	debugger
+	addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistObj.id})
+
 }
 
 
