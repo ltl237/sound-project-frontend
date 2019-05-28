@@ -18,7 +18,6 @@ function handleAllPlaylistData(playlistData){
 	for (let i = keys.length - 1; i >= 0; i--) {
 		console.log(playlistData[keys[i]])
 
-		// debugger
 		const playlistDiv = document.createElement("div")
 		const playlistH3 = document.createElement("h3")
 		playlistH3.innerText = playlistData[keys[i]].playlistTitle
@@ -28,42 +27,39 @@ function handleAllPlaylistData(playlistData){
 		outerDiv.appendChild(playlistDiv)
 
 		addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistData[keys[i]].playlistID})
-		// debugger
 	}
-
-
-	// debugger
 }
 
 function makeCreateDiv(){
 	const playlistDiv = document.createElement("div")
 	outerDiv.appendChild(playlistDiv)
 	const playlistDivContent = document.createElement("h3")
-	playlistDivContent.innerText = "Create a playlist !"
+	playlistDivContent.innerText = "Create a playlist!"
 	playlistDiv.appendChild(playlistDivContent)
 	playlistDiv.id = "playlist-create"
 
-	const outerAlbumModal = document.createElement("div")
-	outerAlbumModal.className = "modal"
-	outerAlbumModal.id = "create-modal"
+	const outerListModal = document.createElement("div")
+	outerListModal.className = "modal"
+	outerListModal.id = "create-modal"
 	const albumWrapper = document.createElement("div")
 	albumWrapper.className = "modal-wrapper"
-	outerDiv.appendChild(outerAlbumModal)
+
+	outerDiv.appendChild(outerListModal)
 	const xbutton = document.createElement("span")
 	xbutton.innerText = "x"
 	xbutton.className = "close"
 
 	xbutton.onclick = function() {
-		outerAlbumModal.style.display = "none"
+		outerListModal.style.display = "none"
 	}
-	outerAlbumModal.appendChild(albumWrapper)
-	outerAlbumModal.appendChild(xbutton)
+	outerListModal.appendChild(albumWrapper)
+	outerListModal.appendChild(xbutton)
 	playlistDiv.onclick = function() {
-	  outerAlbumModal.style.display = "block";
+	  outerListModal.style.display = "block";
 	}
 	window.onclick = function(event) {
-	  if (event.target == outerAlbumModal) {
-	    outerAlbumModal.style.display = "none";
+	  if (event.target == outerListModal) {
+	    outerListModal.style.display = "none";
 	  }
 	}
 	const createForm = document.createElement("form")
@@ -75,13 +71,12 @@ function makeCreateDiv(){
 	artistToSearchInput.placeholder = "Search Albums of This Artist"
 	const artistSearchButton = document.createElement("button")
 	artistSearchButton.innerText = "SEARCH"
-	// artistSearchButton.dataset.
+
 	artistSearchButton.addEventListener("click", () => {
 		const select = document.querySelector("#select")
 		while (select.firstChild) {
 			select.removeChild(select.firstChild)
 		}
-		// debugger
 		searchAlbumsForThisArtist()
 	})
 	const select = document.createElement("select")
@@ -122,7 +117,6 @@ function searchAlbumsForThisArtist(event) {
 }
 
 function putAlbumsInDropDown(albumData) {
-	// console.log(albumData)
 	// let artistStringInputTag = document.querySelector(".artist-to-search-input")
 
 	const albumsDiv = document.querySelector(".albums-div")
@@ -153,6 +147,7 @@ function putAlbumsInDropDown(albumData) {
 			const newH4 = document.createElement("h4")
 			newAlbum.appendChild(newH4)
 			newH4.innerText = selOption.value
+
 			// on selection, create album in database
 			createAlbumInDb(selOption, newH4)
 
@@ -184,7 +179,6 @@ function createAlbumInDb(selOpt, h4Div){
 	.then(resp => resp.json())
 	.then(data => h4Div.id = (`h4-${data.id}`))
 
-
 }
 
 function createPlaylistInDb(){
@@ -203,11 +197,11 @@ function createPlaylistInDb(){
 	})
 	.then(resp => resp.json())
 	.then(function(data) {
-		// createClassifications(data)
-		createPlaylistCard(data)
+		// createClassifications(data) (lorenzo to do tues night)
+		createPlaylistCard(data) // (mallory to do tues night)
 	})
 
-
+	function
 
 	// to access album ids for classification creation
 	// for (let item of albumsList.children) {
@@ -219,20 +213,25 @@ function createPlaylistInDb(){
 function createPlaylistCard(playlistObj) {
 	const playlistDiv = document.createElement("div")
 	const playlistH3 = document.createElement("h3")
-	const playlistTitle = playlistObj.title
+	const title = playlistObj.title
 
-	playlistH3.innerText = playlistTitle
+	playlistH3.innerText = title
+
+	const outerListModal = document.querySelector('.albumDiv')
 
 	playlistDiv.appendChild(playlistH3)
-	outerDiv.appendChild(playlistDiv)
+	outerListModal.appendChild(playlistDiv)
+
+	outerDiv.appendChild(outerListModal)
+	debugger
 
 	// refactor??
-	let allAlbums = document.querySelectorAll("h4[id^='h4-']")
-	for (let album of allAlbums) {
+	// let allAlbums = document.querySelectorAll("h4[id^='h4-']")
+	// for (let album of allAlbums) {
+	//
+	// }
 
-	}
-	debugger
-	addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistObj.id})
+	// addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistObj.id})
 
 }
 
