@@ -121,14 +121,18 @@ function putAlbumsInDropDown(albumData) {
 	select.appendChild(blankFirstOption)
 	albumData.forEach(album => {
 		const newOption = document.createElement("option")
+		newOption.dataset.artistName = album.artist.name
 		newOption.value = album.name
 		newOption.innerText = album.name
 		select.appendChild(newOption)
 	})
 
 	select.addEventListener("change", () => {
+		// post fetch to create album
+
 		let selOption = select.options[select.selectedIndex]
 		let firstOption = select.options[0]
+		createAlbumInDb(selOption)
 		if (selOption !== firstOption) {
 			console.log(selOption.value)
 			const newAlbum = document.createElement("div")
@@ -146,6 +150,25 @@ function putAlbumsInDropDown(albumData) {
 		// debugger
 	})
 
+}
+
+function createAlbumInDb(selOpt){
+	let artist = selOpt.dataset.artistName
+	let title = selOpt.value
+
+	fetch("http://localhost:3000/api/v1/albums", {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
+		},
+		body: JSON.stringify({
+			artist: artist,
+			title: title
+		})
+	})
+	.then(resp => console.log(resp.json()))
+	.then(data => console.log(data))
 }
 
 
