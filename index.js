@@ -2,34 +2,92 @@ console.log("hello world")
 const playlistUrl = "http://localhost:3000/api/v1/playlists"
 const albumUrl = "http://localhost:3000/api/v1/albums"
 const classificationsUrl = "http://localhost:3000/api/v1/classifications"
-const outerDiv = document.querySelector("#outerDiv")
+const outerDiv = document.querySelector("#outer-div")
 
-
+///// FETCH ALL PLAYLISTS
 fetch(playlistUrl)
 .then(res => res.json())
-.then(playlistData => handleAllPlaylistData(playlistData))
+.then(playlistData => createPlaylistCard(playlistData)) // can we split this into two call backs? create card and add albums to the card?
 
-function handleAllPlaylistData(playlistData){
+
+///// CREATE PLAYLIST CARD
+function createPlaylistCard(playlistData){
+
 	makeCreateDiv()
 
 	const keys = Object.keys(playlistData)
-	console.log(playlistData)
 
-	for (let i = keys.length - 1; i >= 0; i--) {
-		console.log(playlistData[keys[i]])
+	for (let i = 0; i < keys.length; i++) {
 
-		const playlistDiv = document.createElement("div")
-		const playlistH3 = document.createElement("h3")
-		playlistH3.innerText = playlistData[keys[i]].playlistTitle
+		const playlistDiv = document.createElement("div") // div for whole playlist
 		playlistDiv.id = `playlist-${playlistData[keys[i]].playlistID}`
 
+		const playlistH3 = document.createElement("h3") // title of playlist
+		playlistH3.innerText = playlistData[keys[i]].playlistTitle
+
+		const playlistModal = document.createElement("div") // modal for indv playlist
+		playlistModal.className = ("modal")
+
+		const xbutton = document.createElement("span") // exit button for playlist modal
+		xbutton.innerText = "x"
+		xbutton.className = "close"
+
+		xbutton.onclick = function() {
+			playlistModal.style.display = "none"
+		}
+
+		// click away close modal
+		window.onclick = function(event) {
+			console.log(event.target)
+			console.log(playlistModal)
+		  if (event.target === playlistModal) {
+		    playlistModal.style.display = "none";
+		  }
+		}
+
+		// playlist on click expand modal
+		playlistDiv.onclick = function() {
+		  playlistModal.style.display = "block";
+		}
+
+		const albumsWrapper = document.createElement("div") // list of all albums on playlist
+		albumsWrapper.className = ("albums-wrapper")
+
 		playlistDiv.appendChild(playlistH3)
-		outerDiv.appendChild(playlistDiv)
+		playlistDiv.appendChild(playlistModal)
+			playlistModal.appendChild(albumsWrapper)
+			playlistModal.appendChild(xbutton)
+		outerDiv.appendChild(playlistDiv) // add whole playlist div to outer div
 
 		addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistData[keys[i]].playlistID})
 	}
 }
 
+///// ADD ALBUMS TO PLAYLIST CARD
+function addAlbumsToPlaylist(playlistObj) {
+
+	const playlistDiv = document.querySelector(`#playlist-${playlistObj['playlistID']}`)
+	const playlistModal = playlistDiv.querySelector('.modal')
+	const wrapper = playlistDiv.querySelector('.albums-wrapper')
+
+	playlistObj.albums.forEach((album) => {
+		const singleAlbumDiv = document.createElement("div")
+		const albumP = document.createElement("p")
+
+		albumP.innerText = album.title + " by " + album.artist
+
+		singleAlbumDiv.appendChild(albumP)
+		singleAlbumDiv.dataset.albumId = album.id
+
+		wrapper.appendChild(singleAlbumDiv)
+
+		playlistDiv.onclick = function() {
+		  playlistModal.style.display = "block";
+		}
+	})
+}
+
+///// CARD TO CREATE NEW PLAYLIST
 function makeCreateDiv(){
 	const playlistDiv = document.createElement("div")
 	outerDiv.appendChild(playlistDiv)
@@ -91,7 +149,7 @@ function makeCreateDiv(){
 	saveButton.addEventListener("click", () => {
 		createPlaylistInDb();
 		// createClassifcation();
-		// createPlaylistCard();
+		createPlaylistCard();
 	})
 
 
@@ -105,6 +163,7 @@ function makeCreateDiv(){
 	albumWrapper.appendChild(saveButton)
 }
 
+///// SEARCH BY ARTIST FEATURE
 function searchAlbumsForThisArtist(event) {
 
 	let artistStringInput = document.querySelector(".artist-to-search-input").value
@@ -116,16 +175,16 @@ function searchAlbumsForThisArtist(event) {
 
 }
 
+///// ADD SEARCH RESULTS TO DROPDOWN SELECT
 function putAlbumsInDropDown(albumData) {
-	// let artistStringInputTag = document.querySelector(".artist-to-search-input")
 
 	const albumsDiv = document.querySelector(".albums-div")
 	const select = document.querySelector("#select") // select dropdown for albums
-	const blankFirstOption = document.createElement("option") // placeholder first option on dropdown
-	blankFirstOption.innerText = "Choose an album"
+	const placeholderOption = document.createElement("option") // placeholder first option on dropdown
+	placeholderOption.innerText = "Choose an album"
 
 	// create dropdown options
-	select.appendChild(blankFirstOption)
+	select.appendChild(placeholderOption)
 	albumData.forEach(album => {
 		const newOption = document.createElement("option")
 		newOption.dataset.artistName = album.artist.name
@@ -138,11 +197,8 @@ function putAlbumsInDropDown(albumData) {
 
 		const selOption = select.options[select.selectedIndex]
 		let firstOption = select.options[0]
-
-
-		// bug fix for select registering change event duplicates
+		// disables placeholder first option
 		if (selOption !== firstOption) {
-			// console.log(selOption.value)
 			const newAlbum = document.createElement("div")
 			const newH4 = document.createElement("h4")
 			newAlbum.appendChild(newH4)
@@ -161,6 +217,7 @@ function putAlbumsInDropDown(albumData) {
 	})
 }
 
+///// CREATE ALBUM IN DATABASE
 function createAlbumInDb(selOpt, h4Div){
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
@@ -181,6 +238,7 @@ function createAlbumInDb(selOpt, h4Div){
 
 }
 
+///// CREATE PLAYLIST IN DATABASE
 function createPlaylistInDb(){
 	const albumsList = document.querySelector('.albums-div')
 	const playlistName = document.querySelector('.title-input')
@@ -197,85 +255,13 @@ function createPlaylistInDb(){
 	})
 	.then(resp => resp.json())
 	.then(function(data) {
-		// createClassifications(data) (lorenzo to do tues night)
-		createPlaylistCard(data) // (mallory to do tues night)
+		debugger
+		// createClassifications(data)
+		createPlaylistCard(data)
 	})
-
-	function
 
 	// to access album ids for classification creation
 	// for (let item of albumsList.children) {
 	// console.log(item.firstChild.dataset.albumId)
 	// }
-}
-
-
-function createPlaylistCard(playlistObj) {
-	const playlistDiv = document.createElement("div")
-	const playlistH3 = document.createElement("h3")
-	const title = playlistObj.title
-
-	playlistH3.innerText = title
-
-	const outerListModal = document.querySelector('.albumDiv')
-
-	playlistDiv.appendChild(playlistH3)
-	outerListModal.appendChild(playlistDiv)
-
-	outerDiv.appendChild(outerListModal)
-	debugger
-
-	// refactor??
-	// let allAlbums = document.querySelectorAll("h4[id^='h4-']")
-	// for (let album of allAlbums) {
-	//
-	// }
-
-	// addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistObj.id})
-
-}
-
-
-
-
-function addAlbumsToPlaylist(albumsAndPlaylists) {
-	const playlistDiv = document.querySelector(`#playlist-${albumsAndPlaylists['playlistID']}`)
-
-	console.log(albumsAndPlaylists)
-	// debugger
-	const outerAlbumModal = document.createElement("div")
-	outerAlbumModal.className = "modal"
-	const albumWrapper = document.createElement("div")
-	albumWrapper.className = "albumDiv"
-
-	const xbutton = document.createElement("span")
-	xbutton.innerText = "x"
-	xbutton.className = "close"
-
-	xbutton.onclick = function() {
-		outerAlbumModal.style.display = "none"
-	}
-	outerAlbumModal.appendChild(albumWrapper)
-	outerAlbumModal.appendChild(xbutton)
-
-	albumsAndPlaylists.albums[0].forEach((album) => {
-		const singleAlbumDiv = document.createElement("div")
-		const albumP = document.createElement("p")
-		albumP.innerText = album.title + " by " + album.artist
-		singleAlbumDiv.appendChild(albumP)
-		singleAlbumDiv.dataset.albumId = album.id
-		albumWrapper.appendChild(singleAlbumDiv)
-		// playlistDiv.appendChild(albumDiv)
-		playlistDiv.onclick = function() {
-		  outerAlbumModal.style.display = "block";
-		}
-
-		outerDiv.appendChild(outerAlbumModal)
-		window.onclick = function(event) {
-		  if (event.target == outerAlbumModal) {
-		    outerAlbumModal.style.display = "none";
-		  }
-		}
-	})
-
 }
