@@ -178,8 +178,7 @@ function searchAlbumsForThisArtist(event) {
 
 	fetch(`http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&artist=${mutatedArtistString}&api_key=56db8dc89ddf7721c47c718da7786420&format=json&limit=15"`)
 	.then(res => res.json())
-	.then(albumData => putAlbumsInDropDown(albumData["topalbums"].album))
-
+	.then(albumData => putAlbumsInDropDown(albumData["topalbums"]))
 }
 
 ///// ADD SEARCH RESULTS TO DROPDOWN SELECT
@@ -192,9 +191,10 @@ function putAlbumsInDropDown(albumData) {
 
 	// create dropdown options
 	select.appendChild(placeholderOption)
-	albumData.forEach(album => {
+	albumData.album.forEach(album => {
 		const newOption = document.createElement("option")
 		newOption.dataset.artistName = album.artist.name
+    newOption.dataset.albumImg = album.image[2]["#text"]
 		newOption.value = album.name
 		newOption.innerText = album.name
 		select.appendChild(newOption)
@@ -225,9 +225,11 @@ function putAlbumsInDropDown(albumData) {
 }
 
 ///// CREATE ALBUM IN DATABASE
+//// not working to put image url in database fuck that
 function createAlbumInDb(selOpt, h4Div){
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
+  let album_image = selOpt.dataset.albumImg
 
 	fetch("http://localhost:3000/api/v1/albums", {
 		method: 'POST',
@@ -237,7 +239,8 @@ function createAlbumInDb(selOpt, h4Div){
 		},
 		body: JSON.stringify({
 			artist: artist,
-			title: title
+			title: title,
+      album_image:album_image
 		})
 	})
 	.then(resp => resp.json())
