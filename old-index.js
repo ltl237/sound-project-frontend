@@ -3,34 +3,132 @@ const playlistUrl = "http://localhost:3000/api/v1/playlists"
 const albumUrl = "http://localhost:3000/api/v1/albums"
 const classificationsUrl = "http://localhost:3000/api/v1/classifications"
 const outerDiv = document.querySelector("#outer-div")
-const outerModal = document.querySelector("#outer-modal")
-const createPlaylistDiv = document.querySelector("#playlist-create")
 
 
-makeCreateDiv()
-fetchAllClassifications()
+testFetch()
 
-// closes modal on off click, resets modal html
-window.onclick = function(event) {
-	  if (event.target == outerModal) {
-	    outerModal.style.display = "none";
-      outerModal.innerHTML = ""
-	  }
+function testFetch () {
+	fetch(classificationsUrl)
+	.then(res => res.json())
+	.then(function(playlistData) {
+		console.log(playlistData)
+		// debugger
+})
 }
 
-function fetchAllClassifications(){
-  fetch(classificationsUrl)
-  .then(resp => resp.json())
-  .then(classes => {
 
-    classes.forEach(function(classi){
-      addPlaylistCardToDom(classi)
-    })
-
-  })
+///// FETCH ALL PLAYLISTS
+function getPlaylistFromDb () {
+	fetch(playlistUrl)
+	.then(res => res.json())
+	.then(playlistData => createPlaylistCard(playlistData))
 }
 
-// "create new playlist" card
+getPlaylistFromDb()
+
+///// CREATE PLAYLIST CARD
+function createPlaylistCard(playlistData){
+
+	makeCreateDiv()
+
+	const keys = Object.keys(playlistData)
+
+	for (let i = 0; i < keys.length; i++) {
+
+		const playlistDiv = document.createElement("div") // div for whole playlist
+		playlistDiv.id = `playlist-${playlistData[keys[i]].playlistID}`
+
+		const playlistH3 = document.createElement("h3") // title of playlist
+		playlistH3.innerText = playlistData[keys[i]].playlistTitle
+
+		const playlistModal = document.createElement("div") // modal for indv playlist
+		playlistModal.className = ("modal")
+
+		// const xbutton = document.createElement("span") // exit button for playlist modal
+		// xbutton.innerText = "x"
+		// xbutton.className = "close"
+		//
+		// xbutton.onclick = function() {
+		// 	playlistModal.style.display = "none"
+		// }
+
+		// click away close modal
+		// window.onclick = function(event) {
+		//   if (event.target === playlistModal) {
+		//     playlistModal.style.display = "none";
+		//   }
+		// }
+
+		// playlist on click expand modal
+		playlistDiv.onclick = function() {
+		  playlistModal.style.display = "block";
+		}
+
+		const albumsWrapper = document.createElement("div") // list of all albums on playlist
+		albumsWrapper.className = ("albums-wrapper")
+
+		playlistDiv.appendChild(playlistH3)
+		playlistDiv.appendChild(playlistModal)
+			playlistModal.appendChild(albumsWrapper)
+			// playlistModal.appendChild(xbutton)
+		outerDiv.appendChild(playlistDiv) // add whole playlist div to outer div
+
+		addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistData[keys[i]].playlistID})
+	}
+}
+
+
+document.onclick = function(event) {
+	const modals = document.querySelectorAll('.modal')
+	if (event.target.classList.contains('modal')) {
+		event.target.style.display = "none";
+	}
+
+}
+
+///// ADD ALBUMS TO PLAYLIST CARD
+function addAlbumsToPlaylist(playlistObj) {
+
+	const playlistDiv = document.querySelector(`#playlist-${playlistObj['playlistID']}`)
+	const playlistModal = playlistDiv.querySelector('.modal')
+	const wrapper = playlistDiv.querySelector('.albums-wrapper')
+
+	playlistObj.albums.forEach((album) => {
+		const singleAlbumDiv = document.createElement("div")
+		const albumP = document.createElement("p")
+
+		const upVote = document.createElement("button")
+		upVote.className = "vote-button"
+		upVote.dataset.albumId = album.id
+		upVote.innerText = "👍"
+		upVote.onclick = () => increaseVote(album.id)
+
+		const downVote = document.createElement("button")
+		downVote.className = "vote-button"
+		downVote.id = "down-vote"
+		downVote.innerText = "👎"
+
+		albumP.innerText = album.title + " by " + album.artist
+
+		singleAlbumDiv.appendChild(albumP)
+		singleAlbumDiv.appendChild(upVote)
+		singleAlbumDiv.appendChild(downVote)
+
+		singleAlbumDiv.dataset.albumId = album.id
+
+		wrapper.appendChild(singleAlbumDiv)
+
+		playlistDiv.onclick = function() {
+		  playlistModal.style.display = "block";
+		}
+	})
+}
+
+function increaseVote(albumId){
+
+}
+
+///// CARD TO CREATE NEW PLAYLIST
 function makeCreateDiv(){
 	const playlistDiv = document.createElement("div")
 	outerDiv.appendChild(playlistDiv)
@@ -39,96 +137,30 @@ function makeCreateDiv(){
 	playlistDiv.appendChild(playlistDivContent)
 	playlistDiv.id = "playlist-create"
 
-  playlistDiv.onclick = function() {
-    createPlaylistModal()
-  }
-}
-
-function addPlaylistCardToDom(classificationObject){
-
-  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-    const playlistDiv = document.createElement("div")
-  	outerDiv.appendChild(playlistDiv)
-  	const playlistDivContent = document.createElement("h3")
-    playlistDivContent.innerText = (classificationObject.playlist.title)
-    playlistDiv.appendChild(playlistDivContent)
-    playlistDiv.id = (`playlist-id-${classificationObject.playlist.id}`)
-
-    playlistDiv.onclick = function() {
-      outerModal.innerHTML = ""
-      handlePlaylistCardClick(classificationObject)
-      outerModal.style.display = "block"
-    }
-  }
-}
-
-
-function handlePlaylistCardClick(classificationObject) {
-    fetch(classificationsUrl)
-  	.then(res => res.json())
-  	.then(playlistData => {
-      const playlistId = classificationObject.playlist.id
-      const playlistAlbums = []
-  		playlistData.forEach(function(c){
-        if (c.playlist.id === playlistId) {
-          playlistAlbums.push(c.album)
-
-        }
-      })
-      addAlbumListToModal(classificationObject, playlistAlbums)
-    })
-}
-
-function addAlbumListToModal(classificationObject, playlistAlbums){
-
-  console.log(arguments)
-  const playlistWrapper = document.createElement("div")
-  const playlistTitle = document.createElement("h3")
-  playlistTitle.innerText = (classificationObject.playlist.title)
-  playlistWrapper.appendChild(playlistTitle)
-
-  playlistAlbums.forEach(function(album){
-    const indvAlbumDiv = document.createElement("div")
-    const indvAlbumH4 = document.createElement("h4")
-    indvAlbumDiv.id = (`album-id-${album.id}`)
-    indvAlbumH4.innerText = album.title
-
-    const upVote = document.createElement("button")
-		upVote.className = "vote-button"
-		upVote.dataset.albumId = album.id
-		upVote.innerText = "👍"
-		// upVote.onclick = () => increaseVote(album.id)
-
-		const downVote = document.createElement("button")
-		downVote.className = "vote-button"
-		downVote.id = "down-vote"
-		downVote.innerText = "👎"
-
-    outerModal.appendChild(playlistWrapper)
-
-    indvAlbumDiv.appendChild(upVote)
-    indvAlbumDiv.appendChild(downVote)
-    indvAlbumDiv.appendChild(indvAlbumH4)
-
-    if (!document.querySelector(`#album-id-${album.id}`)){
-      playlistWrapper.appendChild(indvAlbumDiv)
-    }
-
-  })
-
-}
-
-
-
-function createPlaylistModal(){
-  outerModal.style.display = "block";
-
-
+	const outerListModal = document.createElement("div")
+	outerListModal.className = "modal"
+	outerListModal.id = "create-modal"
 	const albumWrapper = document.createElement("div")
 	albumWrapper.className = "modal-wrapper"
 
-	outerModal.appendChild(albumWrapper)
+	outerDiv.appendChild(outerListModal)
+	const xbutton = document.createElement("span")
+	xbutton.innerText = "x"
+	xbutton.className = "close"
 
+	xbutton.onclick = function() {
+		outerListModal.style.display = "none"
+	}
+	outerListModal.appendChild(albumWrapper)
+	outerListModal.appendChild(xbutton)
+	playlistDiv.onclick = function() {
+	  outerListModal.style.display = "block";
+	}
+	window.onclick = function(event) {
+	  if (event.target == outerListModal) {
+	    outerListModal.style.display = "none";
+	  }
+	}
 	const createForm = document.createElement("form")
 	const titleInput = document.createElement("input")
 	titleInput.className = "title-input"
@@ -156,9 +188,8 @@ function createPlaylistModal(){
 
 
 	saveButton.addEventListener("click", () => {
-    console.log("YOU CLICKED SAVE")
-    createPlaylistInDb();
-    outerModal.style.display = "none"
+		createPlaylistInDb();
+		// function to put card on dom
 	})
 
 	albumWrapper.appendChild(createForm)
@@ -170,7 +201,7 @@ function createPlaylistModal(){
 	albumWrapper.appendChild(saveButton)
 }
 
-
+///// SEARCH BY ARTIST FEATURE
 function searchAlbumsForThisArtist(event) {
 
 	let artistStringInput = document.querySelector(".artist-to-search-input").value
@@ -289,9 +320,8 @@ function createClassificationsInDb(playListObject){
 		})
 		.then(resp => resp.json())
 		.then(function(classificationObject) {
-		  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-        addPlaylistCardToDom(classificationObject)
-      }
+		console.log(classificationObject)
+		debugger
 		})
 	 })
 
