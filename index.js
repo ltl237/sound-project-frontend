@@ -7,7 +7,7 @@ const outerDiv = document.querySelector("#outer-div")
 ///// FETCH ALL PLAYLISTS
 fetch(playlistUrl)
 .then(res => res.json())
-.then(playlistData => createPlaylistCard(playlistData)) // can we split this into two call backs? create card and add albums to the card?
+.then(playlistData => createPlaylistCard(playlistData))
 
 
 ///// CREATE PLAYLIST CARD
@@ -28,18 +28,16 @@ function createPlaylistCard(playlistData){
 		const playlistModal = document.createElement("div") // modal for indv playlist
 		playlistModal.className = ("modal")
 
-		const xbutton = document.createElement("span") // exit button for playlist modal
-		xbutton.innerText = "x"
-		xbutton.className = "close"
-
-		xbutton.onclick = function() {
-			playlistModal.style.display = "none"
-		}
+		// const xbutton = document.createElement("span") // exit button for playlist modal
+		// xbutton.innerText = "x"
+		// xbutton.className = "close"
+		//
+		// xbutton.onclick = function() {
+		// 	playlistModal.style.display = "none"
+		// }
 
 		// click away close modal
 		window.onclick = function(event) {
-			console.log(event.target)
-			console.log(playlistModal)
 		  if (event.target === playlistModal) {
 		    playlistModal.style.display = "none";
 		  }
@@ -56,7 +54,7 @@ function createPlaylistCard(playlistData){
 		playlistDiv.appendChild(playlistH3)
 		playlistDiv.appendChild(playlistModal)
 			playlistModal.appendChild(albumsWrapper)
-			playlistModal.appendChild(xbutton)
+			// playlistModal.appendChild(xbutton)
 		outerDiv.appendChild(playlistDiv) // add whole playlist div to outer div
 
 		addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistData[keys[i]].playlistID})
@@ -148,14 +146,11 @@ function makeCreateDiv(){
 
 	saveButton.addEventListener("click", () => {
 		createPlaylistInDb();
-		// createClassifcation();
-		createPlaylistCard();
+		// put card on dom
 	})
-
 
 	albumWrapper.appendChild(createForm)
 	albumWrapper.appendChild(titleInput)
-
 	albumWrapper.appendChild(artistToSearchInput)
 	albumWrapper.appendChild(select)
 	albumWrapper.appendChild(albumsDiv)
@@ -234,13 +229,11 @@ function createAlbumInDb(selOpt, h4Div){
 		})
 	})
 	.then(resp => resp.json())
-	.then(data => h4Div.id = (`h4-${data.id}`))
-
+	.then(data => h4Div.dataset.albumId = (`${data.id}`))
 }
 
 ///// CREATE PLAYLIST IN DATABASE
 function createPlaylistInDb(){
-	const albumsList = document.querySelector('.albums-div')
 	const playlistName = document.querySelector('.title-input')
 
 	fetch(playlistUrl, {
@@ -255,13 +248,32 @@ function createPlaylistInDb(){
 	})
 	.then(resp => resp.json())
 	.then(function(data) {
-		debugger
-		// createClassifications(data)
-		createPlaylistCard(data)
+	 	createClassificationsInDb(data)
 	})
+}
 
-	// to access album ids for classification creation
-	// for (let item of albumsList.children) {
-	// console.log(item.firstChild.dataset.albumId)
-	// }
+///// CREATE CLASSIFICATIONS IN DATABASE
+function createClassificationsInDb(data){
+	const albumsList = document.querySelector('.albums-div')
+	const title = data.title
+	const playlistId = data.id
+	const albumIds = []
+
+	for (let item of albumsList.children) {
+		albumIds.push(item.firstChild.dataset.albumId)
+	}
+
+	albumIds.forEach(function(albumId) {
+		fetch(classificationsUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			},
+			body: JSON.stringify({
+				playlist_id: playlistId,
+				album_id: albumId
+			})
+		})
+	 })
 }
