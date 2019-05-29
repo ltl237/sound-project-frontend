@@ -5,10 +5,13 @@ const classificationsUrl = "http://localhost:3000/api/v1/classifications"
 const outerDiv = document.querySelector("#outer-div")
 
 ///// FETCH ALL PLAYLISTS
-fetch(playlistUrl)
-.then(res => res.json())
-.then(playlistData => createPlaylistCard(playlistData))
+function getPlaylistFromDb () {
+	fetch(playlistUrl)
+	.then(res => res.json())
+	.then(playlistData => createPlaylistCard(playlistData))
+}
 
+getPlaylistFromDb()
 
 ///// CREATE PLAYLIST CARD
 function createPlaylistCard(playlistData){
@@ -37,11 +40,11 @@ function createPlaylistCard(playlistData){
 		// }
 
 		// click away close modal
-		window.onclick = function(event) {
-		  if (event.target === playlistModal) {
-		    playlistModal.style.display = "none";
-		  }
-		}
+		// window.onclick = function(event) {
+		//   if (event.target === playlistModal) {
+		//     playlistModal.style.display = "none";
+		//   }
+		// }
 
 		// playlist on click expand modal
 		playlistDiv.onclick = function() {
@@ -59,6 +62,15 @@ function createPlaylistCard(playlistData){
 
 		addAlbumsToPlaylist({albums: playlistData[keys[i]].albums, playlistID: playlistData[keys[i]].playlistID})
 	}
+}
+
+
+document.onclick = function(event) {
+	const modals = document.querySelectorAll('.modal')
+	if (event.target.classList.contains('modal')) {
+		event.target.style.display = "none";
+	}
+
 }
 
 ///// ADD ALBUMS TO PLAYLIST CARD
@@ -146,7 +158,7 @@ function makeCreateDiv(){
 
 	saveButton.addEventListener("click", () => {
 		createPlaylistInDb();
-		// put card on dom
+		// function to put card on dom
 	})
 
 	albumWrapper.appendChild(createForm)
@@ -275,5 +287,7 @@ function createClassificationsInDb(data){
 				album_id: albumId
 			})
 		})
+		.then(getPlaylistFromDb())
 	 })
+
 }
