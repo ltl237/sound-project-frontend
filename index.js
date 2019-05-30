@@ -195,12 +195,13 @@ function upOrDownVote(classificationObject, votesToAdd){
 		})
 	}).then(() => {
 		votesP.innerText = classificationObject.votes
-		console.log(votesP)
-		console.log("VOTES AFTER CLICK:", classificationObject.votes)
+		// console.log(votesP)
+		// console.log("VOTES AFTER CLICK:", classificationObject.votes)
 		// debugger
 		let thingToRemove = document.querySelector("div[id^='onmodal-playlist'")
 		// event.target.parentElement.parentElement.parentElement.remove()
 		thingToRemove.remove()
+		// debugger
 		sortAlbumDivs(classificationObject)
 	})
 
