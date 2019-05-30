@@ -56,10 +56,11 @@ function addPlaylistCardToDom(classificationObject){
 	if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
 
 		const playlistDiv = document.createElement("div")
-		console.log(classificationObject.album.album_image)
+		// debugger
+		console.log(classificationObject.album.albumImg)
 		playlistDiv.innerHTML = `
 		  <p class="image">
-			<img src="${classificationObject.album.album_image}">
+			<img src="${classificationObject.album.albumImg}">
 		  </p>
 		  <div class="content">
 		    <p class="header" href="">${classificationObject.playlist.title}</p>
@@ -334,9 +335,9 @@ function createAlbumInDb(selOpt, h4Div){
 	let title = selOpt.value
 	// debugger
 	if (selOpt.dataset.albumImg === "") {
-  	album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
+  		album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
 	}
-
+	debugger
 	fetch("http://localhost:3000/api/v1/albums", {
 		method: 'POST',
 		headers: {
@@ -346,7 +347,7 @@ function createAlbumInDb(selOpt, h4Div){
 		body: JSON.stringify({
 			artist: artist,
 			title: title,
-      album_image: album_image
+      		albumImg: album_image
 		})
 	})
 	.then(resp => resp.json())
@@ -403,7 +404,7 @@ function createClassificationsInDb(playListObject){
 		.then(resp => resp.json())
 		.then(function(classificationObject) {
 		  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-				console.log("before addPlaylistCardToDom", classificationObject.album.album_image)
+				// console.log("before addPlaylistCardToDom", classificationObject.album.album_image)
         addPlaylistCardToDom(classificationObject)
       }
 		})
