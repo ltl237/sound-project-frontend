@@ -68,23 +68,45 @@ function handlePlaylistCardClick(classificationObject) {
   	.then(res => res.json())
   	.then(classificationsData => {
       const playlistId = classificationObject.playlist.id
-      const playlistAlbums = []
+      const albumsAndClassifications = []
       const playlistDict = {}
   		classificationsData.forEach(function(c){
         if (c.playlist.id === playlistId) {
-          playlistAlbums.push({album: c.album, classification: c})
+          albumsAndClassifications.push({album: c.album, classification: c})
           // playlistDict[c.classification.id] = c.album
 
         }
 
       })
-      addAlbumListToModal(classificationObject, playlistAlbums)
+  		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
+      addAlbumListToModal(classificationObject, albumsAndClassifications)
     })
 }
 
-function addAlbumListToModal(classificationObject, playlistAlbums){
+function sortAlbumDivs(classificationObject){
+	console.log("Sorting")
+	fetch(classificationsUrl)
+	.then(res => res.json())
+	.then(allClassificationData => {
+		const playlistId = classificationObject.playlist.id
+		const albumsAndClassifications = []
+        const playlistDict = {}
+  		allClassificationData.forEach(function(c){
+        if (c.playlist.id === playlistId) {
+          albumsAndClassifications.push({album: c.album, classification: c})
+          // playlistDict[c.classification.id] = c.album
 
+        }
 
+      })
+  		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
+      addAlbumListToModal(classificationObject, albumsAndClassifications)	
+	})
+}
+
+function addAlbumListToModal(classificationObject, albumsAndClassifications){
+
+	// debugger
   const playlistWrapper = document.createElement("div")
   const playlistTitle = document.createElement("h4")
 
@@ -92,7 +114,7 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
   playlistWrapper.id = `onmodal-playlist-${classificationObject.playlist.id}`
   playlistWrapper.appendChild(playlistTitle)
   // debugger
-  playlistAlbums.forEach(function(obj){
+  albumsAndClassifications.forEach(function(obj){
   	const {album, classification} = obj
   	// debugger
     const indvAlbumDiv = document.createElement("div")
@@ -128,11 +150,29 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
     indvAlbumDiv.appendChild(votingDiv)
     // debugger
     
-
+    let allPTags = document.querySelectorAll("p[id^='votes-']")
+    let votesAndTheirDiv = {}
+    let orderedVotesAndDiv = {}
     if (!document.querySelector(`#album-id-${album.id}`)){
       playlistWrapper.appendChild(indvAlbumDiv)
     }
+    allPTags.forEach((pTag) => {
+    	votesAndTheirDiv[parseInt(pTag.innerText)] = pTag.parentElement.parentElement
+    	// votesAndTheirDiv[pTag] = pTag.parentElement.parentElement
+    })
+    // let keysArray = Object.keys(votesAndTheirDiv).sort()
+    // let newA = []
+    // keysArray.map(key => {
+    // 	newA.push(parseInt(key))
+    // 	// debugger
+    // })
 
+    Object.keys(votesAndTheirDiv).sort().forEach(key => {
+	  orderedVotesAndDiv[parseInt(key)] = votesAndTheirDiv[parseInt(key)];
+	  // debugger
+	})
+
+    // debugger
   })
 
 }
@@ -157,6 +197,9 @@ function upOrDownVote(classificationObject, votesToAdd){
 	votesP.innerText = classificationObject.votes
 	console.log(votesP)
 	console.log("VOTES AFTER CLICK:", classificationObject.votes)
+	// debugger
+	event.target.parentElement.parentElement.parentElement.remove()
+	sortAlbumDivs(classificationObject)
 }
 
 function createPlaylistModal(){
