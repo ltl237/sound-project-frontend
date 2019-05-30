@@ -195,7 +195,6 @@ function putAlbumsInDropDown(albumData) {
 		const newOption = document.createElement("option")
 		newOption.dataset.artistName = album.artist.name
     newOption.dataset.albumImg = album.image[2]["#text"]
-
 		newOption.value = album.name
 		newOption.innerText = album.name
 		select.appendChild(newOption)
@@ -205,41 +204,16 @@ function putAlbumsInDropDown(albumData) {
 
 		const selOption = select.options[select.selectedIndex]
 		let firstOption = select.options[0]
-		// debugger
 		// disables placeholder first option
 		if (selOption !== firstOption) {
 			const newAlbum = document.createElement("div")
 			const newH4 = document.createElement("h4")
 			newAlbum.appendChild(newH4)
 			newH4.innerText = selOption.value
-			// debugger
+
 			// on selection, create album in database
-			// createAlbumInDb(selOption, newH4)
-			let artist = selOption.dataset.artistName
-			let title = selOption.value
-		  	let albumImg = selOption.dataset.albumImg
-		  // debugger
-		  console.log(albumImg)
-			fetch("http://localhost:3000/api/v1/albums", {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept': 'application/json'
-				},
-				body: JSON.stringify({
-					albumImg: albumImg,
-					artist: artist,
-					title: title
+			createAlbumInDb(selOption, newH4)
 
-				})
-			})
-			.then(resp => resp.json())
-			.then(data => {
-				// debugger
-				newAlbum.dataset.albumId = (`${data.id}`)
-			})
-
-			//
 			albumsDiv.appendChild(newAlbum)
 			for(let i = 0; i < event.target.length; i++){
 				if (event.target[i].value == selOption.value){
@@ -255,8 +229,8 @@ function putAlbumsInDropDown(albumData) {
 function createAlbumInDb(selOpt, h4Div){
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
-  	let albumImg = selOpt.dataset.albumImg
-  // debugger
+  let album_image = selOpt.dataset.albumImg
+
 	fetch("http://localhost:3000/api/v1/albums", {
 		method: 'POST',
 		headers: {
@@ -264,19 +238,13 @@ function createAlbumInDb(selOpt, h4Div){
 			'Accept': 'application/json'
 		},
 		body: JSON.stringify({
-			albumImg: albumImg,
-			artist: albumImg,
-			title: title
-
+			artist: artist,
+			title: title,
+      album_image:album_image
 		})
 	})
 	.then(resp => resp.json())
-	.then(data => {
-		// debugger
-		h4Div.dataset.albumId = (`${data.id}`)
-	})
-	// debugger
-
+	.then(data => h4Div.dataset.albumId = (`${data.id}`))
 }
 
 ///// CREATE PLAYLIST IN DATABASE
