@@ -3,6 +3,7 @@ const playlistUrl = "http://localhost:3000/api/v1/playlists"
 const albumUrl = "http://localhost:3000/api/v1/albums"
 const classificationsUrl = "http://localhost:3000/api/v1/classifications"
 const outerDiv = document.querySelector("#outer-div")
+outerDiv.className = "ui link stackable cards"
 const outerModal = document.querySelector("#outer-modal")
 const createPlaylistDiv = document.querySelector("#playlist-create")
 
@@ -32,30 +33,44 @@ function fetchAllClassifications(){
 
 // "create new playlist" card
 function makeCreateDiv(){
-	const playlistDiv = document.createElement("div")
-	outerDiv.appendChild(playlistDiv)
-	const playlistDivContent = document.createElement("h3")
-	playlistDivContent.innerText = "Create a playlist!"
-	playlistDiv.appendChild(playlistDivContent)
-	playlistDiv.id = "playlist-create"
 
-  playlistDiv.onclick = function() {
+	const createPlaylistDiv = document.createElement("div")
+	createPlaylistDiv.innerHTML = `
+	  <p class="image">
+	    <img src="https://lastfm-img2.akamaized.net/i/u/174s/80daaf62c7fbbf6ddaa143030b684e12.png">
+	  </p>
+	  <div class="content">
+	    <p class="header">Create A Playlist!</p>
+	  </div>
+	`
+	createPlaylistDiv.classList = "ui card"
+	createPlaylistDiv.onclick = function() {
     createPlaylistModal()
   }
+
+	outerDiv.appendChild(createPlaylistDiv)
 }
 
 function addPlaylistCardToDom(classificationObject){
 
-  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-    const playlistDiv = document.createElement("div")
-  	outerDiv.appendChild(playlistDiv)
-  	const playlistDivContent = document.createElement("h3")
-    playlistDivContent.innerText = (classificationObject.playlist.title)
-    playlistDiv.appendChild(playlistDivContent)
-    playlistDiv.id = (`playlist-id-${classificationObject.playlist.id}`)
+	if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
 
-    playlistDiv.onclick = function() {
-      outerModal.innerHTML = ""
+		const playlistDiv = document.createElement("div")
+		console.log(classificationObject.album.album_image)
+		playlistDiv.innerHTML = `
+		  <p class="image">
+			<img src="${classificationObject.album.album_image}">
+		  </p>
+		  <div class="content">
+		    <p class="header" href="">${classificationObject.playlist.title}</p>
+		  </div>
+		`
+
+		playlistDiv.id = `playlist-id-${classificationObject.playlist.id}`
+		playlistDiv.classList = "ui card"
+		outerDiv.appendChild(playlistDiv)
+
+	playlistDiv.onclick = function() {
       handlePlaylistCardClick(classificationObject)
       outerModal.style.display = "block"
     }
@@ -100,7 +115,7 @@ function sortAlbumDivs(classificationObject){
 
       })
   		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
-      addAlbumListToModal(classificationObject, albumsAndClassifications)	
+      addAlbumListToModal(classificationObject, albumsAndClassifications)
 	})
 }
 
@@ -119,6 +134,7 @@ function addAlbumListToModal(classificationObject, albumsAndClassifications){
   	// debugger
     const indvAlbumDiv = document.createElement("div")
     const indvAlbump = document.createElement("p")
+		indvAlbumDiv.classList = "ui card horizontal"
     indvAlbumDiv.id = (`album-id-${album.id}`)
     indvAlbump.innerText = album.title
 
@@ -150,7 +166,7 @@ function addAlbumListToModal(classificationObject, albumsAndClassifications){
     votingDiv.appendChild(downVote)
     indvAlbumDiv.appendChild(votingDiv)
     // debugger
-    
+
     let allPTags = document.querySelectorAll("p[id^='votes-']")
     let votesAndTheirDiv = {}
     let orderedVotesAndDiv = {}
@@ -190,16 +206,13 @@ function upOrDownVote(classificationObject, votesToAdd){
 			"Accept": "application/json"
 		},
 		body: JSON.stringify({
-			id: classificationObject.id, 
-			votes: classificationObject.votes 
+			id: classificationObject.id,
+			votes: classificationObject.votes
 		})
 	}).then(() => {
 		votesP.innerText = classificationObject.votes
-		// console.log(votesP)
-		// console.log("VOTES AFTER CLICK:", classificationObject.votes)
-		// debugger
+
 		let thingToRemove = document.querySelector("div[id^='onmodal-playlist'")
-		// event.target.parentElement.parentElement.parentElement.remove()
 		thingToRemove.remove()
 		// debugger
 		sortAlbumDivs(classificationObject)
@@ -246,6 +259,7 @@ function createPlaylistModal(){
     // console.log("YOU CLICKED SAVE")
     createPlaylistInDb();
     outerModal.style.display = "none"
+
 	})
 
 	albumWrapper.appendChild(createForm)
@@ -314,9 +328,14 @@ function putAlbumsInDropDown(albumData) {
 ///// CREATE ALBUM IN DATABASE
 //// not working to put image url in database fuck that
 function createAlbumInDb(selOpt, h4Div){
+
+	let album_image = selOpt.dataset.albumImg
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
-  let album_image = selOpt.dataset.albumImg
+	// debugger
+	if (selOpt.dataset.albumImg === "") {
+  	album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
+	}
 
 	fetch("http://localhost:3000/api/v1/albums", {
 		method: 'POST',
@@ -327,12 +346,13 @@ function createAlbumInDb(selOpt, h4Div){
 		body: JSON.stringify({
 			artist: artist,
 			title: title,
-      album_image:album_image
+      album_image: album_image
 		})
 	})
 	.then(resp => resp.json())
 	.then(data => h4Div.dataset.albumId = (`${data.id}`))
 }
+
 
 ///// CREATE PLAYLIST IN DATABASE
 function createPlaylistInDb(){
@@ -365,6 +385,8 @@ function createClassificationsInDb(playListObject){
 		albumIds.push(item.firstChild.dataset.albumId)
 	}
 
+	outerModal.innerHTML = ""
+
 	albumIds.forEach(function(albumId) {
 		fetch(classificationsUrl, {
 			method: 'POST',
@@ -381,6 +403,7 @@ function createClassificationsInDb(playListObject){
 		.then(resp => resp.json())
 		.then(function(classificationObject) {
 		  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
+				console.log("before addPlaylistCardToDom", classificationObject.album.album_image)
         addPlaylistCardToDom(classificationObject)
       }
 		})
