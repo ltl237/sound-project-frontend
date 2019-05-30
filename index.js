@@ -129,6 +129,7 @@ function addAlbumListToModal(classificationObject, albumsAndClassifications){
 	votingDiv.className = "voting-div"
 	votingDiv.appendChild(votesP)
 	// debugger
+	console.log("votesP", votesP)
     const upVote = document.createElement("button")
 	upVote.className = "upvote vote-button"
 	upVote.dataset.albumId = album.id
@@ -192,14 +193,17 @@ function upOrDownVote(classificationObject, votesToAdd){
 			id: classificationObject.id, 
 			votes: classificationObject.votes 
 		})
+	}).then(() => {
+		votesP.innerText = classificationObject.votes
+		console.log(votesP)
+		console.log("VOTES AFTER CLICK:", classificationObject.votes)
+		// debugger
+		let thingToRemove = document.querySelector("div[id^='onmodal-playlist'")
+		// event.target.parentElement.parentElement.parentElement.remove()
+		thingToRemove.remove()
+		sortAlbumDivs(classificationObject)
 	})
 
-	votesP.innerText = classificationObject.votes
-	console.log(votesP)
-	console.log("VOTES AFTER CLICK:", classificationObject.votes)
-	// debugger
-	event.target.parentElement.parentElement.parentElement.remove()
-	sortAlbumDivs(classificationObject)
 }
 
 function createPlaylistModal(){

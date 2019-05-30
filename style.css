@@ -64,14 +64,23 @@ div[id^="onmodal-playlist-"] {
 }
 div[id^="onmodal-playlist-"] p{
 	display: inline-block;
+	/*border-bottom: 1px solid grey;*/
+}
+div[id^="album-id-"] {
+	position: relative;
+	border-top: 1px solid grey;
 	border-bottom: 1px solid grey;
+	padding: 5px;
+	text-align: left;
 }
 
-/*div[id^="album-id-"]{
-	display: inline-block;
-}*/
+
+
 
 .voting-div {
 	display: inline-block;
 	margin-left: 10px;
+	position: absolute;
+	right: 5px;
+
 }
