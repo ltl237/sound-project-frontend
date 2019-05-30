@@ -68,12 +68,15 @@ function handlePlaylistCardClick(classificationObject) {
   	.then(res => res.json())
   	.then(playlistData => {
       const playlistId = classificationObject.playlist.id
-      const playlistAlbums = []
+      // const playlistAlbums = []
+      const playlistDict = {}
   		playlistData.forEach(function(c){
         if (c.playlist.id === playlistId) {
-          playlistAlbums.push(c.album)
+          // playlistAlbums.push(c.album)
+          playlistDict[c.classification.id] = c.album
 
         }
+
       })
       addAlbumListToModal(classificationObject, playlistAlbums)
     })
@@ -81,34 +84,48 @@ function handlePlaylistCardClick(classificationObject) {
 
 function addAlbumListToModal(classificationObject, playlistAlbums){
 
-  console.log(arguments)
-  const playlistWrapper = document.createElement("div")
-  const playlistTitle = document.createElement("h3")
-  playlistTitle.innerText = (classificationObject.playlist.title)
-  playlistWrapper.appendChild(playlistTitle)
 
+  const playlistWrapper = document.createElement("div")
+  const playlistTitle = document.createElement("h4")
+
+  playlistTitle.innerText = (classificationObject.playlist.title)
+  playlistWrapper.id = `onmodal-playlist-${classificationObject.playlist.id}`
+  playlistWrapper.appendChild(playlistTitle)
+  debugger
   playlistAlbums.forEach(function(album){
     const indvAlbumDiv = document.createElement("div")
-    const indvAlbumH4 = document.createElement("h4")
+    const indvAlbump = document.createElement("p")
     indvAlbumDiv.id = (`album-id-${album.id}`)
-    indvAlbumH4.innerText = album.title
+    indvAlbump.innerText = album.title
 
+    const votingDiv = document.createElement("div")
+    const votesP = document.createElement("p")
+    votesP.innerText = classificationObject.votes
+    votesP.id = `votes-${classificationObject.id}`
+	votingDiv.className = "voting-div"
+	votingDiv.appendChild(votesP)
+	// debugger
     const upVote = document.createElement("button")
-		upVote.className = "vote-button"
-		upVote.dataset.albumId = album.id
-		upVote.innerText = "👍"
-		// upVote.onclick = () => increaseVote(album.id)
-
-		const downVote = document.createElement("button")
-		downVote.className = "vote-button"
-		downVote.id = "down-vote"
-		downVote.innerText = "👎"
-
+	upVote.className = "upvote vote-button"
+	upVote.dataset.albumId = album.id
+	upVote.innerText = "👍"
+	upVote.id = `downvote-${classificationObject.id}`
+	console.log("VOTES BEFORE:", classificationObject.votes)
+	upVote.onclick = () => upOrDownVote(classificationObject, 1)
+	// if(event.target)
+	const downVote = document.createElement("button")
+	downVote.className = "downvote vote-button"
+	downVote.id = `downvote-${classificationObject.id}`
+	downVote.onclick = () => upOrDownVote(classificationObject, -1)
+	downVote.innerText = "👎"
+	// debugger
     outerModal.appendChild(playlistWrapper)
-
-    indvAlbumDiv.appendChild(upVote)
-    indvAlbumDiv.appendChild(downVote)
-    indvAlbumDiv.appendChild(indvAlbumH4)
+    indvAlbumDiv.appendChild(indvAlbump)
+    votingDiv.appendChild(upVote)
+    votingDiv.appendChild(downVote)
+    indvAlbumDiv.appendChild(votingDiv)
+    // debugger
+    
 
     if (!document.querySelector(`#album-id-${album.id}`)){
       playlistWrapper.appendChild(indvAlbumDiv)
@@ -118,7 +135,27 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
 
 }
 
+function upOrDownVote(classificationObject, votesToAdd){
+	let votesP = event.target.parentElement.firstChild
+	// let newVoteValue = parseInt(votesP.innerText) + votesToAdd
+	classificationObject.votes = parseInt(votesP.innerText) + votesToAdd
+	// debugger
+	fetch(classificationsUrl + `/${classificationObject.id}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+			"Accept": "application/json"
+		},
+		body: JSON.stringify({
+			id: classificationObject.id, 
+			votes: classificationObject.votes 
+		})
+	})
 
+	votesP.innerText = classificationObject.votes
+	console.log(votesP)
+	console.log("VOTES AFTER CLICK:", classificationObject.votes)
+}
 
 function createPlaylistModal(){
   outerModal.style.display = "block";
@@ -156,7 +193,7 @@ function createPlaylistModal(){
 
 
 	saveButton.addEventListener("click", () => {
-    console.log("YOU CLICKED SAVE")
+    // console.log("YOU CLICKED SAVE")
     createPlaylistInDb();
     outerModal.style.display = "none"
 	})
@@ -287,7 +324,8 @@ function createClassificationsInDb(playListObject){
 			},
 			body: JSON.stringify({
 				playlist_id: playlistId,
-				album_id: albumId
+				album_id: albumId,
+				votes: 0
 			})
 		})
 		.then(resp => resp.json())

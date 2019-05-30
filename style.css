@@ -55,8 +55,23 @@ div[id^="playlist-"] {
 }
 
 
+div[id^="onmodal-playlist-"] {
+	text-align: center;
+	border: 2px solid yellow;
+	width: 75%;
+	background-color: white;
+	margin:0 auto;
+}
+div[id^="onmodal-playlist-"] p{
+	display: inline-block;
+	border-bottom: 1px solid grey;
+}
 
+/*div[id^="album-id-"]{
+	display: inline-block;
+}*/
 
-
-
-
+.voting-div {
+	display: inline-block;
+	margin-left: 10px;
+}
