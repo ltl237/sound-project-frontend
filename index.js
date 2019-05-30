@@ -3,9 +3,9 @@ const playlistUrl = "http://localhost:3000/api/v1/playlists"
 const albumUrl = "http://localhost:3000/api/v1/albums"
 const classificationsUrl = "http://localhost:3000/api/v1/classifications"
 const outerDiv = document.querySelector("#outer-div")
+outerDiv.className = "ui link stackable cards"
 const outerModal = document.querySelector("#outer-modal")
 const createPlaylistDiv = document.querySelector("#playlist-create")
-
 
 makeCreateDiv()
 fetchAllClassifications()
@@ -32,30 +32,74 @@ function fetchAllClassifications(){
 
 // "create new playlist" card
 function makeCreateDiv(){
-	const playlistDiv = document.createElement("div")
-	outerDiv.appendChild(playlistDiv)
-	const playlistDivContent = document.createElement("h3")
-	playlistDivContent.innerText = "Create a playlist!"
-	playlistDiv.appendChild(playlistDivContent)
-	playlistDiv.id = "playlist-create"
 
-  playlistDiv.onclick = function() {
+	const createPlaylistDiv = document.createElement("div")
+	createPlaylistDiv.innerHTML = `
+	  <p class="image">
+	    <img src="https://lastfm-img2.akamaized.net/i/u/174s/80daaf62c7fbbf6ddaa143030b684e12.png">
+	  </p>
+	  <div class="content">
+	    <p class="header">Create A Playlist!</p>
+	  </div>
+	`
+	createPlaylistDiv.classList = "ui card"
+	createPlaylistDiv.onclick = function() {
     createPlaylistModal()
   }
+
+	outerDiv.appendChild(createPlaylistDiv)
+
+
+
+	// const playlistDiv = document.createElement("div")
+	// playlistDiv.className = "card"
+	// outerDiv.appendChild(playlistDiv)
+	//
+	// const createPlaylistImg = document.createElement("img")
+	// createPlaylistImg.className = "image"
+	// createPlaylistImg.src = "https://lastfm-img2.akamaized.net/i/u/174s/80daaf62c7fbbf6ddaa143030b684e12.png"
+	//
+	// playlistDiv.appendChild(createPlaylistImg)
+	//
+	// const playlistDivContent = document.createElement("h3")
+	// playlistDivContent.className = "header"
+	// playlistDivContent.innerText = "Create a playlist!"
+	// playlistDiv.appendChild(playlistDivContent)
+
+
+
+	// playlistDiv.id = "playlist-create"
+
+
 }
 
 function addPlaylistCardToDom(classificationObject){
 
   if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-    const playlistDiv = document.createElement("div")
-  	outerDiv.appendChild(playlistDiv)
-  	const playlistDivContent = document.createElement("h3")
-    playlistDivContent.innerText = (classificationObject.playlist.title)
-    playlistDiv.appendChild(playlistDivContent)
-    playlistDiv.id = (`playlist-id-${classificationObject.playlist.id}`)
+
+		const playlistDiv = document.createElement("div")
+		playlistDiv.innerHTML = `
+		  <p class="image">
+		    <img src=${classificationObject.album.album_image}>
+		  </p>
+		  <div class="content">
+		    <p class="header" href="">${classificationObject.playlist.title}</p>
+		  </div>
+		`
+		playlistDiv.id = `playlist-id-${classificationObject.playlist.id}`
+		playlistDiv.classList = "ui card"
+		outerDiv.appendChild(playlistDiv)
+
+
+		// const playlistDiv = document.createElement("div")
+		// playlistDiv.className = "card"
+  	// outerDiv.appendChild(playlistDiv)
+  	// const playlistDivContent = document.createElement("h3")
+    // playlistDivContent.innerText = (classificationObject.playlist.title)
+    // playlistDiv.appendChild(playlistDivContent)
 
     playlistDiv.onclick = function() {
-      outerModal.innerHTML = ""
+      // outerModal.innerHTML = ""
       handlePlaylistCardClick(classificationObject)
       outerModal.style.display = "block"
     }
@@ -81,7 +125,6 @@ function handlePlaylistCardClick(classificationObject) {
 
 function addAlbumListToModal(classificationObject, playlistAlbums){
 
-  console.log(arguments)
   const playlistWrapper = document.createElement("div")
   const playlistTitle = document.createElement("h3")
   playlistTitle.innerText = (classificationObject.playlist.title)
@@ -227,9 +270,13 @@ function putAlbumsInDropDown(albumData) {
 ///// CREATE ALBUM IN DATABASE
 //// not working to put image url in database fuck that
 function createAlbumInDb(selOpt, h4Div){
+	let album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
-  let album_image = selOpt.dataset.albumImg
+
+	if (!selOpt.dataset.albumImg === "") {
+  	album_image = selOpt.dataset.albumImg
+	}
 
 	fetch("http://localhost:3000/api/v1/albums", {
 		method: 'POST',
@@ -240,7 +287,7 @@ function createAlbumInDb(selOpt, h4Div){
 		body: JSON.stringify({
 			artist: artist,
 			title: title,
-      album_image:album_image
+      album_image: album_image
 		})
 	})
 	.then(resp => resp.json())
