@@ -56,10 +56,10 @@ function addPlaylistCardToDom(classificationObject){
 	if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
 
 		const playlistDiv = document.createElement("div")
-		console.log(classificationObject.album.album_image)
+		console.log(classificationObject.album.albumImg)
 		playlistDiv.innerHTML = `
 		  <p class="image">
-			<img src="${classificationObject.album.album_image}">
+			<img src="${classificationObject.album.albumImg}">
 		  </p>
 		  <div class="content">
 		    <p class="header" href="">${classificationObject.playlist.title}</p>
@@ -109,10 +109,7 @@ function sortAlbumDivs(classificationObject){
   		allClassificationData.forEach(function(c){
         if (c.playlist.id === playlistId) {
           albumsAndClassifications.push({album: c.album, classification: c})
-          // playlistDict[c.classification.id] = c.album
-
         }
-
       })
   		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
       addAlbumListToModal(classificationObject, albumsAndClassifications)
@@ -134,7 +131,7 @@ function addAlbumListToModal(classificationObject, albumsAndClassifications){
   	// debugger
     const indvAlbumDiv = document.createElement("div")
     const indvAlbump = document.createElement("p")
-		indvAlbumDiv.classList = "ui card horizontal"
+		// indvAlbumDiv.classList = "ui card horizontal"
     indvAlbumDiv.id = (`album-id-${album.id}`)
     indvAlbump.innerText = album.title
 
@@ -296,6 +293,7 @@ function putAlbumsInDropDown(albumData) {
 		const newOption = document.createElement("option")
 		newOption.dataset.artistName = album.artist.name
     newOption.dataset.albumImg = album.image[2]["#text"]
+		console.log(newOption.dataset.albumImg)
 		newOption.value = album.name
 		newOption.innerText = album.name
 		select.appendChild(newOption)
@@ -346,7 +344,7 @@ function createAlbumInDb(selOpt, h4Div){
 		body: JSON.stringify({
 			artist: artist,
 			title: title,
-      album_image: album_image
+      albumImg: album_image
 		})
 	})
 	.then(resp => resp.json())
@@ -403,7 +401,7 @@ function createClassificationsInDb(playListObject){
 		.then(resp => resp.json())
 		.then(function(classificationObject) {
 		  if (!document.querySelector(`#playlist-id-${classificationObject.playlist.id}`)) {
-				console.log("before addPlaylistCardToDom", classificationObject.album.album_image)
+				console.log("before addPlaylistCardToDom", classificationObject.album.albumImg)
         addPlaylistCardToDom(classificationObject)
       }
 		})
