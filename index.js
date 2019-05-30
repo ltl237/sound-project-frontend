@@ -66,14 +66,14 @@ function addPlaylistCardToDom(classificationObject){
 function handlePlaylistCardClick(classificationObject) {
     fetch(classificationsUrl)
   	.then(res => res.json())
-  	.then(playlistData => {
+  	.then(classificationsData => {
       const playlistId = classificationObject.playlist.id
-      // const playlistAlbums = []
+      const playlistAlbums = []
       const playlistDict = {}
-  		playlistData.forEach(function(c){
+  		classificationsData.forEach(function(c){
         if (c.playlist.id === playlistId) {
-          // playlistAlbums.push(c.album)
-          playlistDict[c.classification.id] = c.album
+          playlistAlbums.push({album: c.album, classification: c})
+          // playlistDict[c.classification.id] = c.album
 
         }
 
@@ -91,8 +91,10 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
   playlistTitle.innerText = (classificationObject.playlist.title)
   playlistWrapper.id = `onmodal-playlist-${classificationObject.playlist.id}`
   playlistWrapper.appendChild(playlistTitle)
-  debugger
-  playlistAlbums.forEach(function(album){
+  // debugger
+  playlistAlbums.forEach(function(obj){
+  	const {album, classification} = obj
+  	// debugger
     const indvAlbumDiv = document.createElement("div")
     const indvAlbump = document.createElement("p")
     indvAlbumDiv.id = (`album-id-${album.id}`)
@@ -100,8 +102,8 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
 
     const votingDiv = document.createElement("div")
     const votesP = document.createElement("p")
-    votesP.innerText = classificationObject.votes
-    votesP.id = `votes-${classificationObject.id}`
+    votesP.innerText = classification.votes
+    votesP.id = `votes-${classification.id}`
 	votingDiv.className = "voting-div"
 	votingDiv.appendChild(votesP)
 	// debugger
@@ -109,14 +111,14 @@ function addAlbumListToModal(classificationObject, playlistAlbums){
 	upVote.className = "upvote vote-button"
 	upVote.dataset.albumId = album.id
 	upVote.innerText = "👍"
-	upVote.id = `downvote-${classificationObject.id}`
-	console.log("VOTES BEFORE:", classificationObject.votes)
-	upVote.onclick = () => upOrDownVote(classificationObject, 1)
+	upVote.id = `downvote-${classification.id}`
+	console.log("VOTES BEFORE:", classification.votes)
+	upVote.onclick = () => upOrDownVote(classification, 1)
 	// if(event.target)
 	const downVote = document.createElement("button")
 	downVote.className = "downvote vote-button"
-	downVote.id = `downvote-${classificationObject.id}`
-	downVote.onclick = () => upOrDownVote(classificationObject, -1)
+	downVote.id = `downvote-${classification.id}`
+	downVote.onclick = () => upOrDownVote(classification, -1)
 	downVote.innerText = "👎"
 	// debugger
     outerModal.appendChild(playlistWrapper)
