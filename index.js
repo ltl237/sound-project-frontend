@@ -201,15 +201,23 @@ function createPlaylistModal(){
 	albumWrapper.className = "modal-wrapper"
 	outerModal.appendChild(albumWrapper)
 
-	const createForm = document.createElement("form")
-	const titleInput = document.createElement("input")
-	titleInput.className = "title-input"
-	titleInput.placeholder = "Title of Playlist"
-	const artistToSearchInput = document.createElement("input")
-	artistToSearchInput.className = "artist-to-search-input"
-	artistToSearchInput.placeholder = "Search Albums of This Artist"
-	const artistSearchButton = document.createElement("button")
-	artistSearchButton.innerText = "SEARCH"
+	const formDiv = document.createElement("div")
+	formDiv.innerHTML = `
+		<div class="ui big input">
+			<input type="text" class="title-input" placeholder="PLAYLIST NAME">
+		</div>
+		<div class="ui big input">
+			<input class="artist-to-search-input" placeholder="ARTIST NAME">
+		</div>
+		<div>
+			<select id="select" class="ui dropdown"></select>
+		</div>
+		<div class="albums-div"> </div>
+		<button id="search-button">SEARCH</button>
+		<button id="save-button">SAVE</button>`
+
+		albumWrapper.appendChild(formDiv)
+		const artistSearchButton = formDiv.querySelector("#search-button")
 
 	artistSearchButton.addEventListener("click", () => {
 		const select = document.querySelector("#select")
@@ -218,28 +226,13 @@ function createPlaylistModal(){
 		}
 		searchAlbumsForThisArtist()
 	})
-	const select = document.createElement("select")
-	select.id = "select"
-	const albumsDiv = document.createElement("div")
-	albumsDiv.className = "albums-div"
-	const saveButton = document.createElement("button")
-	saveButton.innerText = "SAVE"
-	saveButton.id = ('save-button')
 
-
+	const saveButton = formDiv.querySelector("#save-button")
 	saveButton.addEventListener("click", () => {
     createPlaylistInDb();
     outerModal.style.display = "none"
 
 	})
-
-	albumWrapper.appendChild(createForm)
-	albumWrapper.appendChild(titleInput)
-	albumWrapper.appendChild(artistToSearchInput)
-	albumWrapper.appendChild(select)
-	albumWrapper.appendChild(albumsDiv)
-	albumWrapper.appendChild(artistSearchButton)
-	albumWrapper.appendChild(saveButton)
 }
 
 
@@ -303,7 +296,7 @@ function createAlbumInDb(selOpt, h4Div){
 	if (selOpt.dataset.albumImg === "") {
   		album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
 	}
-	fetch("http://localhost:3000/api/v1/albums", {
+	fetch(albumUrl, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
