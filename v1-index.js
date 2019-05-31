@@ -3,9 +3,11 @@ const playlistUrl = "http://localhost:3000/api/v1/playlists"
 const albumUrl = "http://localhost:3000/api/v1/albums"
 const classificationsUrl = "http://localhost:3000/api/v1/classifications"
 const outerDiv = document.querySelector("#outer-div")
-outerDiv.className = "ui link stackable cards centered"
+outerDiv.className = "ui link stackable cards"
 const outerModal = document.querySelector("#outer-modal")
+// outerModal.classList = "ui container"
 const createPlaylistDiv = document.querySelector("#playlist-create")
+
 
 makeCreateDiv()
 fetchAllClassifications()
@@ -22,9 +24,11 @@ function fetchAllClassifications(){
   fetch(classificationsUrl)
   .then(resp => resp.json())
   .then(classes => {
+
     classes.forEach(function(classi){
       addPlaylistCardToDom(classi)
     })
+
   })
 }
 
@@ -34,7 +38,7 @@ function makeCreateDiv(){
 	const createPlaylistDiv = document.createElement("div")
 	createPlaylistDiv.innerHTML = `
 	  <p class="image">
-	    <img src="https://lastfm-img2.akamaized.net/i/u/174s/3017b2f31110e4f6de45a212fe93b4a3.png">
+	    <img src="https://lastfm-img2.akamaized.net/i/u/174s/80daaf62c7fbbf6ddaa143030b684e12.png">
 	  </p>
 	  <div class="content">
 	    <p class="header">Create A Playlist!</p>
@@ -61,13 +65,14 @@ function addPlaylistCardToDom(classificationObject){
 		  </p>
 		  <div class="content">
 		    <p class="header" href="">${classificationObject.playlist.title}</p>
-		  </div>`
+		  </div>
+		`
 
 		playlistDiv.id = `playlist-id-${classificationObject.playlist.id}`
 		playlistDiv.classList = "ui card"
 		outerDiv.appendChild(playlistDiv)
 
-		playlistDiv.onclick = function() {
+	playlistDiv.onclick = function() {
       handlePlaylistCardClick(classificationObject)
       outerModal.style.display = "block"
     }
@@ -76,20 +81,23 @@ function addPlaylistCardToDom(classificationObject){
 
 
 function handlePlaylistCardClick(classificationObject) {
-  fetch(classificationsUrl)
-	.then(res => res.json())
-	.then(classificationsData => {
-    const playlistId = classificationObject.playlist.id
-    const albumsAndClassifications = []
-    const playlistDict = {}
-		classificationsData.forEach(function(c){
-      if (c.playlist.id === playlistId) {
-        albumsAndClassifications.push({album: c.album, classification: c})
-      }
+    fetch(classificationsUrl)
+  	.then(res => res.json())
+  	.then(classificationsData => {
+      const playlistId = classificationObject.playlist.id
+      const albumsAndClassifications = []
+      const playlistDict = {}
+  		classificationsData.forEach(function(c){
+        if (c.playlist.id === playlistId) {
+          albumsAndClassifications.push({album: c.album, classification: c})
+          // playlistDict[c.classification.id] = c.album
+
+        }
+
+      })
+  		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
+      addAlbumListToModal(classificationObject, albumsAndClassifications)
     })
-		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
-    addAlbumListToModal(classificationObject, albumsAndClassifications)
-  })
 }
 
 function sortAlbumDivs(classificationObject){
@@ -99,63 +107,67 @@ function sortAlbumDivs(classificationObject){
 	.then(allClassificationData => {
 		const playlistId = classificationObject.playlist.id
 		const albumsAndClassifications = []
-    const playlistDict = {}
+        const playlistDict = {}
   		allClassificationData.forEach(function(c){
         if (c.playlist.id === playlistId) {
           albumsAndClassifications.push({album: c.album, classification: c})
+          // playlistDict[c.classification.id] = c.album
+
         }
+
       })
-		outerModal.innerHTML = ""
-		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
-    addAlbumListToModal(classificationObject, albumsAndClassifications)
+  		albumsAndClassifications.sort((a, b) => (a.classification.votes > b.classification.votes) ? -1 : 1)
+      addAlbumListToModal(classificationObject, albumsAndClassifications)
 	})
 }
 
 function addAlbumListToModal(classificationObject, albumsAndClassifications){
 
-	const playlistHeader = document.createElement("div")
-	const playlistWrapper = document.createElement("div")
+	// debugger
+  const playlistWrapper = document.createElement("div")
+  const playlistTitle = document.createElement("h4")
 
-	playlistWrapper.className = "ui cards centered modal-wrapper"
-
-	playlistHeader.innerHTML = `
-	<div id ="onmodal-playlist-${classificationObject.playlist.id}">
-		<h2>${classificationObject.playlist.title}</h2>
-	</div>`
-
-	albumsAndClassifications.forEach(function(obj) {
-		const {album, classification} = obj
-		const indvAlbumDiv = document.createElement("div")
-		indvAlbumDiv.classList = "ui card"
+  playlistTitle.innerText = (classificationObject.playlist.title)
+  playlistWrapper.id = `onmodal-playlist-${classificationObject.playlist.id}`
+  playlistWrapper.appendChild(playlistTitle)
+  // debugger
+  albumsAndClassifications.forEach(function(obj){
+  	const {album, classification} = obj
+  	// debugger
+    const indvAlbumDiv = document.createElement("div")
+    const indvAlbump = document.createElement("p")
+		indvAlbumDiv.classList = "ui card horizontal"
     indvAlbumDiv.id = (`album-id-${album.id}`)
+    indvAlbump.innerText = album.title
 
-		indvAlbumDiv.innerHTML = `
-		<div>
-		<h4 class="header">${album.title}</h4>
-		<img class="ui small left floated image" src="${album.album_image}">
-		<div>`
-
-		const voteDiv = document.createElement("div")
-		voteDiv.className= "voting-div"
-		voteDiv.innerHTML = `
-		<span>
-			<p> VOTES:</p>
-			<p id="votes-${classification.id}">${classification.votes}</p>
-			<span class="upvote vote-button ui teal basic circular button" data-album-id="${album.id}" id="upvote-${classification.id}">👍</span>
-			<span class="downvote vote-button ui violet basic circular button" data-album-id="${album.id}" id="downvote-${classification.id}">👎</span>
-			</span>`
-
-		indvAlbumDiv.appendChild(voteDiv)
-
-		playlistWrapper.appendChild(indvAlbumDiv)
-		outerModal.appendChild(playlistHeader)
-		outerModal.appendChild(playlistWrapper)
-
-		const upVote = indvAlbumDiv.querySelector(".upvote")
-		upVote.onclick = () => upOrDownVote(classification, 1)
-
-		const downVote = indvAlbumDiv.querySelector(".downvote")
-		downVote.onclick = () => upOrDownVote(classification, -1)
+    const votingDiv = document.createElement("div")
+    const votesP = document.createElement("p")
+    votesP.innerText = classification.votes
+    votesP.id = `votes-${classification.id}`
+	votingDiv.className = "voting-div"
+	votingDiv.appendChild(votesP)
+	// debugger
+	console.log("votesP", votesP)
+    const upVote = document.createElement("button")
+	upVote.className = "upvote vote-button ui button"
+	upVote.dataset.albumId = album.id
+	upVote.innerText = "👍"
+	upVote.id = `downvote-${classification.id}`
+	console.log("VOTES BEFORE:", classification.votes)
+	upVote.onclick = () => upOrDownVote(classification, 1)
+	// if(event.target)
+	const downVote = document.createElement("button")
+	downVote.className = "downvote vote-button ui button"
+	downVote.id = `downvote-${classification.id}`
+	downVote.onclick = () => upOrDownVote(classification, -1)
+	downVote.innerText = "👎"
+	// debugger
+    outerModal.appendChild(playlistWrapper)
+    indvAlbumDiv.appendChild(indvAlbump)
+    votingDiv.appendChild(upVote)
+    votingDiv.appendChild(downVote)
+    indvAlbumDiv.appendChild(votingDiv)
+    // debugger
 
     let allPTags = document.querySelectorAll("p[id^='votes-']")
     let votesAndTheirDiv = {}
@@ -165,18 +177,30 @@ function addAlbumListToModal(classificationObject, albumsAndClassifications){
     }
     allPTags.forEach((pTag) => {
     	votesAndTheirDiv[parseInt(pTag.innerText)] = pTag.parentElement.parentElement
+    	// votesAndTheirDiv[pTag] = pTag.parentElement.parentElement
     })
+    // let keysArray = Object.keys(votesAndTheirDiv).sort()
+    // let newA = []
+    // keysArray.map(key => {
+    // 	newA.push(parseInt(key))
+    // 	// debugger
+    // })
+
     Object.keys(votesAndTheirDiv).sort().forEach(key => {
 	  orderedVotesAndDiv[parseInt(key)] = votesAndTheirDiv[parseInt(key)];
-		})
+	  // debugger
+	})
+
+    // debugger
   })
+
 }
 
 function upOrDownVote(classificationObject, votesToAdd){
-
-	let votesP = document.querySelector(`#votes-${classificationObject.id}`)
+	let votesP = event.target.parentElement.firstChild
+	// let newVoteValue = parseInt(votesP.innerText) + votesToAdd
 	classificationObject.votes = parseInt(votesP.innerText) + votesToAdd
-
+	// debugger
 	fetch(classificationsUrl + `/${classificationObject.id}`, {
 		method: "PATCH",
 		headers: {
@@ -190,15 +214,21 @@ function upOrDownVote(classificationObject, votesToAdd){
 	}).then(() => {
 		votesP.innerText = classificationObject.votes
 
+		let thingToRemove = document.querySelector("div[id^='onmodal-playlist'")
+		thingToRemove.remove()
+		// debugger
 		sortAlbumDivs(classificationObject)
 	})
+
 }
 
 function createPlaylistModal(){
   outerModal.style.display = "block";
 
+
 	const albumWrapper = document.createElement("div")
 	albumWrapper.className = "modal-wrapper"
+
 	outerModal.appendChild(albumWrapper)
 
 	const createForm = document.createElement("form")
@@ -228,6 +258,7 @@ function createPlaylistModal(){
 
 
 	saveButton.addEventListener("click", () => {
+    // console.log("YOU CLICKED SAVE")
     createPlaylistInDb();
     outerModal.style.display = "none"
 
@@ -276,12 +307,14 @@ function putAlbumsInDropDown(albumData) {
 
 		const selOption = select.options[select.selectedIndex]
 		let firstOption = select.options[0]
-
+		// disables placeholder first option
 		if (selOption !== firstOption) {
 			const newAlbum = document.createElement("div")
 			const newH4 = document.createElement("h4")
 			newAlbum.appendChild(newH4)
 			newH4.innerText = selOption.value
+
+			// on selection, create album in database
 			createAlbumInDb(selOption, newH4)
 
 			albumsDiv.appendChild(newAlbum)
@@ -295,11 +328,13 @@ function putAlbumsInDropDown(albumData) {
 }
 
 ///// CREATE ALBUM IN DATABASE
+//// not working to put image url in database fuck that
 function createAlbumInDb(selOpt, h4Div){
 
 	let album_image = selOpt.dataset.albumImg
 	let artist = selOpt.dataset.artistName
 	let title = selOpt.value
+	// debugger
 	if (selOpt.dataset.albumImg === "") {
   		album_image = "https://lastfm-img2.akamaized.net/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png"
 	}
@@ -318,6 +353,7 @@ function createAlbumInDb(selOpt, h4Div){
 	.then(resp => resp.json())
 	.then(data => h4Div.dataset.albumId = (`${data.id}`))
 }
+
 
 ///// CREATE PLAYLIST IN DATABASE
 function createPlaylistInDb(){
@@ -373,4 +409,5 @@ function createClassificationsInDb(playListObject){
       }
 		})
 	 })
+
 }

@@ -1,18 +1,16 @@
 .modal-wrapper {
-	border: 1px solid black;
-	width: 80%;
-	margin: 0 auto;
+	border: 0px solid black;
+	width: 100%;
+	height: auto;
+	/* margin: 50px; */
 	text-align: center;
 }
-
 
 #outerDiv {
 	position: relative;
 	border: 1px solid black;
 	border-radius: 5px;
 	padding: 5px;
-	/*display: block;*/
-	/*width: 20%;*/
 }
 /* The Modal (background) */
 .modal {
@@ -26,55 +24,9 @@
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgb(255,255,255); /* Fallback color */
+  background-color: rgba(255,255,255,0.7); /* Black w/ opacity */
 }
-
-.close {
-	position: relative;
-  color: #aaaaaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-div[id^="playlist-"] {
-	/*position: relative;
-	border: 1px solid blue;
-	border-radius: 3px;
-	display: inline-block;
-	width: 15%
-	height: 300px;*/
-	 background-color: #fefefe;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 30%;
-  display: inline-block;
-}
-
-
-div[id^="onmodal-playlist-"] {
-	text-align: center;
-	border: 2px solid yellow;
-	width: 75%;
-	background-color: white;
-	margin:0 auto;
-}
-div[id^="onmodal-playlist-"] p{
-	display: inline-block;
-	border-bottom: 1px solid grey;
-}
-div[id^="album-id-"] {
-	position: relative;
-	border-top: 1px solid grey;
-	border-bottom: 1px solid grey;
-	padding: 5px;
-	text-align: left;
-}
-
-
-
 
 .voting-div {
 	display: inline-block;
@@ -82,4 +34,44 @@ div[id^="album-id-"] {
 	position: absolute;
 	right: 5px;
 
+}
+
+.header {
+	/* font-size: 30px; */
+	color: blue;
+}
+
+body {
+	margin-top: 25px;
+	background-image: url(https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?ixlib=rb-1.2.1&auto=format&fit=crop&w=1555&q=80);
+	background-position: top;
+}
+
+h2 {
+	/* background-image: url(https://images.unsplash.com/photo-1486231328412-f20a348f9837?ixlib=rb-1.2.1&auto=format&fit=crop&w=1575&q=80); */
+	background-position: bottom;
+	text-align: center;
+	font-family: 'Shadows Into Light', cursive;
+	/* font-family: 'Michroma', sans-serif; */
+	/* font-family: 'Indie Flower', cursive; */
+	font-size: 45px;
+	padding: 15px;
+	/* color: white; */
+}
+
+h4 {
+	text-align: left;
+	margin-left: 10px;
+	width: 175px;
+	word-wrap: normal;
+}
+
+header {
+	padding: 15px;
+	background-color: rgba(255,255,255,0.7);
+	margin-bottom: 25px;
+}
+
+img {
+	padding: 10px;
 }
