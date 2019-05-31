@@ -203,18 +203,20 @@ function createPlaylistModal(){
 
 	const formDiv = document.createElement("div")
 	formDiv.innerHTML = `
-		<div class="ui big input">
+		<div class="ui massive icon input">
 			<input type="text" class="title-input" placeholder="PLAYLIST NAME">
+			 <i class="search icon"></i>
 		</div>
-		<div class="ui big input">
+		<div class="ui massive icon input">
 			<input class="artist-to-search-input" placeholder="ARTIST NAME">
+			 <i class="search icon"></i>
 		</div>
 		<div>
 			<select id="select" class="ui dropdown"></select>
 		</div>
 		<div class="albums-div"> </div>
-		<button id="search-button">SEARCH</button>
-		<button id="save-button">SAVE</button>`
+		<button id="search-button" class="ui teal big circular button">SEARCH</button>
+		<button id="save-button" class="ui pink big circular button">SAVE</button>`
 
 		albumWrapper.appendChild(formDiv)
 		const artistSearchButton = formDiv.querySelector("#search-button")
@@ -272,7 +274,7 @@ function putAlbumsInDropDown(albumData) {
 
 		if (selOption !== firstOption) {
 			const newAlbum = document.createElement("div")
-			const newH4 = document.createElement("h4")
+			const newH4 = document.createElement("h2")
 			newAlbum.appendChild(newH4)
 			newH4.innerText = selOption.value
 			createAlbumInDb(selOption, newH4)
@@ -288,7 +290,7 @@ function putAlbumsInDropDown(albumData) {
 }
 
 ///// CREATE ALBUM IN DATABASE
-function createAlbumInDb(selOpt, h4Div){
+function createAlbumInDb(selOpt, h2Div){
 
 	let album_image = selOpt.dataset.albumImg
 	let artist = selOpt.dataset.artistName
@@ -309,7 +311,7 @@ function createAlbumInDb(selOpt, h4Div){
 		})
 	})
 	.then(resp => resp.json())
-	.then(data => h4Div.dataset.albumId = (`${data.id}`))
+	.then(data => h2Div.dataset.albumId = (`${data.id}`))
 }
 
 ///// CREATE PLAYLIST IN DATABASE
